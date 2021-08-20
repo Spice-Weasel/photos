@@ -45,18 +45,21 @@ class Application:
         self.window.title("Photos")
         self.window.attributes("-fullscreen", True)
 
-        self.image = NewType('image', ImageTk.Image)
-        self.image = ImageTk.PhotoImage(Image.open(photos_directory + self.store.next()))
+        self.image = Image.open(photos_directory + self.store.next()).resize((200,200))
+
+        self.photo_image = NewType('image', ImageTk.Image)
+        self.photo_image = ImageTk.PhotoImage(self.image)
         
         self.display = tk.Label(self.window)
         self.display.pack(fill=tk.BOTH)
-        self.display.configure(image = self.image)
+        self.display.configure(image = self.photo_image)
 
     def increment_image(self):
         """Get the next image in the directory and
         update the display, call self again in 2000"""
-        self.image = ImageTk.PhotoImage(Image.open(photos_directory + self.store.next()))
-        self.display.configure(image = self.image)
+        self.image = Image.open(photos_directory + self.store.next()).resize((200,200))
+        self.photo_image = ImageTk.PhotoImage(self.image)
+        self.display.configure(image = self.photo_image)
         self.window.after(2000, self.increment_image)
 
 
