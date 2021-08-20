@@ -13,6 +13,8 @@ from typing import List
 from typing import Tuple
 from typing import NewType
 
+from re import split
+
 photos_directory = '/home/ingram/Pictures/waifus/'
 
 class ImageStore:
@@ -45,7 +47,7 @@ class Application:
         self.window.title("Photos")
         self.window.attributes("-fullscreen", True)
 
-        self.image = Image.open(photos_directory + self.store.next()).resize((200,200))
+        self.image = Image.open(photos_directory + self.store.next())
 
         self.photo_image = NewType('image', ImageTk.Image)
         self.photo_image = ImageTk.PhotoImage(self.image)
@@ -54,10 +56,34 @@ class Application:
         self.display.pack(fill=tk.BOTH)
         self.display.configure(image = self.photo_image)
 
+    def scale_image(self, image) -> ImageTk:
+        """Get the size of the tkinter window - this
+        will allow opened images to be scaled accordingly
+        """
+        window_size_raw = self.window.geometry()
+        window_size = split("[x+]", window_size_raw)
+        image_size = image.size
+
+        self.image_scaling_factor = int(window_size[1])/image.size[1]
+
+        print(window_size)
+        print(image.size)
+        print(self.image_scaling_factor)
+
+        x_size = int(self.image_scaling_factor * image_size[0])
+        y_size = int(self.image_scaling_factor * image_size[1])
+
+        try:
+            self.image = image.resize((x_size, y_size))
+        except ValueError:
+            pass
+
+
     def increment_image(self):
         """Get the next image in the directory and
         update the display, call self again in 2000"""
-        self.image = Image.open(photos_directory + self.store.next()).resize((200,200))
+        self.image = Image.open(photos_directory + self.store.next())
+        self.scale_image(self.image)
         self.photo_image = ImageTk.PhotoImage(self.image)
         self.display.configure(image = self.photo_image)
         self.window.after(2000, self.increment_image)
