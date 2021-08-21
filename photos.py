@@ -47,20 +47,26 @@ class Application:
         self.window.title("Photos")
         self.window.attributes("-fullscreen", True)
 
-        self.image = Image.open(photos_directory + self.store.next())
-
-        self.photo_image = NewType('image', ImageTk.Image)
-        self.photo_image = ImageTk.PhotoImage(self.image)
-        
         self.display = tk.Label(self.window)
         self.display.pack(fill=tk.BOTH)
+
+        self.window.update()
+
+    def increment_image(self):
+        """Get the next image in the directory and
+        update the display, call self again in 2000"""
+        self.image = Image.open(photos_directory + self.store.next())
+        self.scale_image(self.image)
+        self.photo_image = ImageTk.PhotoImage(self.image)
         self.display.configure(image = self.photo_image)
+        self.window.after(2000, self.increment_image)
 
     def scale_image(self, image) -> ImageTk:
         """Get the size of the tkinter window - this
         will allow opened images to be scaled accordingly
         """
         window_size_raw = self.window.geometry()
+        print(window_size_raw)
         window_size = split("[x+]", window_size_raw)
         image_size = image.size
 
@@ -77,16 +83,6 @@ class Application:
             self.image = image.resize((x_size, y_size))
         except ValueError:
             pass
-
-
-    def increment_image(self):
-        """Get the next image in the directory and
-        update the display, call self again in 2000"""
-        self.image = Image.open(photos_directory + self.store.next())
-        self.scale_image(self.image)
-        self.photo_image = ImageTk.PhotoImage(self.image)
-        self.display.configure(image = self.photo_image)
-        self.window.after(2000, self.increment_image)
 
 
 
