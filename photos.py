@@ -1,6 +1,8 @@
 """
 This is a program that will cycle through a directory of
-photos and display them on screen
+photos and display them on screen.
+Change photos_directory to where ever your photos are, no
+error handling yet for things that aren't images.
 """
 
 import os
