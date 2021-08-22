@@ -5,6 +5,7 @@ photos and display them on screen
 
 import os
 from time import sleep
+from sys import exit
 import tkinter as tk
 from PIL import Image
 from PIL import ImageTk
@@ -16,19 +17,26 @@ from typing import NewType
 from re import split
 
 photos_directory = '/home/ingram/Pictures/waifus/'
+cycle_period_ms = 30000
+background_colour = "black"
 
 class ImageStore:
     def __init__(self, directory):
+        """Setup image store class"""
         self.dir = directory
         self.image_paths, self.number_of_images = self.get_paths()
         self.index = 0
 
     def get_paths(self) -> Tuple[List[str], int]:
+        """Get names of files in directory"""
         images: List[str]
         images = os.listdir(self.dir)
         return images, len(images)
 
     def next(self, random: bool = False) -> str:
+        """Increment the image counter up to max images
+        and return to 0
+        TODO: Add random image cycling here"""
         if self.index >= (self.number_of_images - 1):
             self.index = 0
         else:
@@ -47,34 +55,29 @@ class Application:
         self.window.title("Photos")
         self.window.attributes("-fullscreen", True)
 
-        self.display = tk.Label(self.window)
+        self.display = tk.Label(self.window, bg=background_colour)
         self.display.pack(fill=tk.BOTH)
 
         self.window.update()
 
     def increment_image(self):
         """Get the next image in the directory and
-        update the display, call self again in 2000"""
+        update the display, call self again in cycle_period_ms"""
         self.image = Image.open(photos_directory + self.store.next())
         self.scale_image(self.image)
         self.photo_image = ImageTk.PhotoImage(self.image)
         self.display.configure(image = self.photo_image)
-        self.window.after(2000, self.increment_image)
+        self.window.after(cycle_period_ms, self.increment_image)
 
     def scale_image(self, image) -> ImageTk:
         """Get the size of the tkinter window - this
         will allow opened images to be scaled accordingly
         """
         window_size_raw = self.window.geometry()
-        print(window_size_raw)
         window_size = split("[x+]", window_size_raw)
         image_size = image.size
 
         self.image_scaling_factor = int(window_size[1])/image.size[1]
-
-        print(window_size)
-        print(image.size)
-        print(self.image_scaling_factor)
 
         x_size = int(self.image_scaling_factor * image_size[0])
         y_size = int(self.image_scaling_factor * image_size[1])
@@ -82,7 +85,7 @@ class Application:
         try:
             self.image = image.resize((x_size, y_size))
         except ValueError:
-            pass
+            exit(1)
 
 
 
