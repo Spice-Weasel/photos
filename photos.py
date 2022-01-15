@@ -93,12 +93,17 @@ class Application:
 
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     app = Application()
     app.increment_image()
     while(1):
-        app.window.update()
-        app.window.update_idletasks()
-        sleep(0.1)
+        try:
+            app.window.update()
+            app.window.update_idletasks()
+            sleep(0.1)
+        except KeyboardInterrupt:
+            print("Keyboard interrupt detected, exiting...")
+            app.window.destroy()
+            break
 
 
