@@ -96,5 +96,9 @@ class Application:
 if __name__ == "__main__":
     app = Application()
     app.increment_image()
-    app.window.mainloop()
+    while(1):
+        app.window.update()
+        app.window.update_idletasks()
+        sleep(0.1)
+
 
