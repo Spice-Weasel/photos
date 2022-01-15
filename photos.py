@@ -5,7 +5,8 @@ Change photos_directory to where ever your photos are, no
 error handling yet for things that aren't images.
 """
 
-import os
+import os, argparse
+import pathlib
 from time import sleep
 from sys import exit
 import tkinter as tk
@@ -18,8 +19,6 @@ from typing import NewType
 
 from re import split
 
-photos_directory = '/home/ingram/Pictures/slideshow/'
-cycle_period_ms = 1000
 background_colour = "black"
 
 class ImageStore:
@@ -47,11 +46,12 @@ class ImageStore:
         return self.image_paths[self.index]
 
 class Application:
-    def __init__(self) -> None:
+    def __init__(self, cycle_period_ms, photos_directory) -> None:
         """Setup the user interface here
         and initialize any dependent classes here
         """
         self.store = ImageStore(photos_directory)
+        self.cycle_period_ms = cycle_period_ms
 
         self.window = tk.Tk()
         self.window.title("Photos")
@@ -65,11 +65,11 @@ class Application:
     def increment_image(self) -> None:
         """Get the next image in the directory and
         update the display, call self again in cycle_period_ms"""
-        self.image = Image.open(photos_directory + self.store.next())
+        self.image = Image.open(str(self.store.dir) + '/' + self.store.next())
         self.scale_image()
         self.photo_image = ImageTk.PhotoImage(self.image)
         self.display.configure(image = self.photo_image)
-        self.window.after(cycle_period_ms, self.increment_image)
+        self.window.after(self.cycle_period_ms, self.increment_image)
 
     def scale_image(self) -> ImageTk:
         """Get the size of the tkinter window - this
@@ -93,8 +93,14 @@ class Application:
 
 
 
-if __name__ == "__main__":  
-    app = Application()
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description="A simple photo-reel programme")
+    parser.add_argument('period_ms', type=int, default=1000)
+    parser.add_argument('store', type=pathlib.Path)
+    args = parser.parse_args()
+
+    app = Application(args.period_ms, args.store)
     app.increment_image()
     while(1):
         try:
