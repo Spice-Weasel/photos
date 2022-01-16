@@ -114,9 +114,9 @@ if __name__ == "__main__":
             app.window.update_idletasks()
             
             time = date.datetime.now()
-            if(time.hour > args.on_time or time.hour < args.off_time):
+            if(time.hour < args.on_time or time.hour >= args.off_time):
                 s.change_brightness(0)
-            elif(time.hour < args.off_time and time.hour > time.on_time):
+            elif(time.hour < args.off_time and time.hour >= args.on_time):
                 s.change_brightness(255)
 
             sleep(0.1)
