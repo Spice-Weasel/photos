@@ -7,6 +7,7 @@ error handling yet for things that aren't images.
 
 import os, argparse
 import pathlib
+import datetime as date
 from time import sleep
 from sys import exit
 import tkinter as tk
@@ -18,6 +19,8 @@ from typing import Tuple
 from typing import NewType
 
 from re import split
+
+from screen import Screen
 
 background_colour = "black"
 
@@ -98,14 +101,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="A simple photo-reel programme")
     parser.add_argument('period_ms', type=int, default=1000)
     parser.add_argument('store', type=pathlib.Path)
+    parser.add_argument('on_time', type=int, default=8)
+    parser.add_argument('off_time', type=int, default=21)
     args = parser.parse_args()
 
     app = Application(args.period_ms, args.store)
     app.increment_image()
+    s = Screen()
     while(1):
         try:
             app.window.update()
             app.window.update_idletasks()
+            
+            time = date.datetime.now()
+            if(time.hour > args.on_time or time.hour < args.off_time):
+                s.change_brightness(0)
+            elif(time.hour < args.off_time and time.hour > time.on_time):
+                s.change_brightness(255)
+
             sleep(0.1)
         except KeyboardInterrupt:
             print("Keyboard interrupt detected, exiting...")
