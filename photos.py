@@ -28,7 +28,6 @@ class ImageStore:
     def __init__(self, directory):
         """Setup image store class"""
         self.dir = directory
-        self.image_paths, self.number_of_images = self.get_paths()
         self.index = 0
 
     def get_paths(self) -> Tuple[List[str], int]:
@@ -41,6 +40,7 @@ class ImageStore:
         """Increment the image counter up to max images
         and return to 0
         TODO: Add random image cycling here"""
+        self.image_paths, self.number_of_images = self.get_paths()
         if self.index >= (self.number_of_images - 1):
             self.index = 0
         else:
@@ -103,21 +103,26 @@ if __name__ == "__main__":
     parser.add_argument('store', type=pathlib.Path)
     parser.add_argument('on_time', type=int, default=8)
     parser.add_argument('off_time', type=int, default=21)
+    parser.add_argument('backlight', type=int, default=0)
     args = parser.parse_args()
 
     app = Application(args.period_ms, args.store)
     app.increment_image()
-    s = Screen()
+
+    if(args.backlight):
+        s = Screen()
+        
     while(1):
         try:
             app.window.update()
             app.window.update_idletasks()
-            
-            time = date.datetime.now()
-            if(time.hour < args.on_time or time.hour >= args.off_time):
-                s.change_brightness(0)
-            elif(time.hour < args.off_time and time.hour >= args.on_time):
-                s.change_brightness(255)
+
+            if(args.backlight):    
+                time = date.datetime.now()
+                if(time.hour < args.on_time or time.hour >= args.off_time):
+                    s.change_brightness(0)
+                elif(time.hour < args.off_time and time.hour >= args.on_time):
+                    s.change_brightness(255)
 
             sleep(0.1)
         except KeyboardInterrupt:
