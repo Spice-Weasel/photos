@@ -21,6 +21,7 @@ from typing import NewType
 from re import split
 
 from screen import Screen
+from threading import Timer
 
 background_colour = "black"
 
@@ -30,7 +31,7 @@ class ImageStore:
         self.dir = directory
         self.index = 0
 
-    def get_paths(self) -> Tuple[List[str], int]:
+    def __get_paths(self) -> Tuple[List[str], int]:
         """Get names of files in directory"""
         images: List[str]
         images = os.listdir(self.dir)
@@ -40,7 +41,7 @@ class ImageStore:
         """Increment the image counter up to max images
         and return to 0
         TODO: Add random image cycling here"""
-        self.image_paths, self.number_of_images = self.get_paths()
+        self.image_paths, self.number_of_images = self.__get_paths()
         if self.index >= (self.number_of_images - 1):
             self.index = 0
         else:
@@ -69,12 +70,12 @@ class Application:
         """Get the next image in the directory and
         update the display, call self again in cycle_period_ms"""
         self.image = Image.open(str(self.store.dir) + '/' + self.store.next())
-        self.scale_image()
+        self.__scale_image()
         self.photo_image = ImageTk.PhotoImage(self.image)
         self.display.configure(image = self.photo_image)
         self.window.after(self.cycle_period_ms, self.increment_image)
 
-    def scale_image(self) -> ImageTk:
+    def __scale_image(self) -> ImageTk:
         """Get the size of the tkinter window - this
         will allow opened images to be scaled accordingly
         """
@@ -111,7 +112,7 @@ if __name__ == "__main__":
 
     if(args.backlight):
         s = Screen()
-        
+
     while(1):
         try:
             app.window.update()
@@ -119,12 +120,19 @@ if __name__ == "__main__":
 
             if(args.backlight):    
                 time = date.datetime.now()
-                if(time.hour < args.on_time or time.hour >= args.off_time):
-                    s.change_brightness(0)
-                elif(time.hour < args.off_time and time.hour >= args.on_time):
-                    s.change_brightness(255)
+                if(s.is_on):
+                    if(time.hour < args.on_time or time.hour >= args.off_time):
+                        s.change_brightness(0)
+                        s.is_on = False
+                        print("Screen off")
+                if(not s.is_on):
+                    if(time.hour < args.off_time and time.hour >= args.on_time):
+                        s.change_brightness(255)
+                        s.is_on = True
+                        print("Screen on")
 
-            sleep(0.1)
+            sleep(1)
+            
         except KeyboardInterrupt:
             print("Keyboard interrupt detected, exiting...")
             app.window.destroy()
