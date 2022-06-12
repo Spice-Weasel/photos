@@ -1,7 +1,10 @@
 #!/bin/bash
 
+export DISPLAY=:0
+xhost +
+
 CYCLE_PERIOD_MS=30000
-IMAGE_DIRECTORY="/path/to/images" #Images go here
+IMAGE_DIRECTORY="/path/to/pictures" #Images go here
 ON_TIME_HOUR=10
 OFF_TIME_HOUR=20
 BACKLIGHT=0

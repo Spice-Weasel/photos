@@ -131,6 +131,10 @@ if __name__ == "__main__":
     parser.add_argument('backlight', type=int, default=0)
     args = parser.parse_args()
 
+    if os.environ.get('DISPLAY','') == '':
+        print('no display found. Using :0.0')
+        os.environ.__setitem__('DISPLAY', ':0.0')
+
     app = Application(args.period_ms, args.store)
     app.increment_image()
 
