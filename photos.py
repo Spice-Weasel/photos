@@ -11,8 +11,7 @@ import datetime as date
 from time import sleep
 from sys import exit
 import tkinter as tk
-from PIL import Image
-from PIL import ImageTk
+from PIL import Image, ImageTk, ExifTags
 
 from typing import List
 from typing import Tuple
@@ -21,7 +20,6 @@ from typing import NewType
 from re import split
 
 from screen import Screen
-from threading import Timer
 
 background_colour = "black"
 
@@ -69,11 +67,37 @@ class Application:
     def increment_image(self) -> None:
         """Get the next image in the directory and
         update the display, call self again in cycle_period_ms"""
-        self.image = Image.open(str(self.store.dir) + '/' + self.store.next())
+        image_path = str(self.store.dir) + '/' + self.store.next()
+        print(image_path)
+        self.image = self.__open_image(image_path)
         self.__scale_image()
         self.photo_image = ImageTk.PhotoImage(self.image)
         self.display.configure(image = self.photo_image)
         self.window.after(self.cycle_period_ms, self.increment_image)
+
+    def __open_image(self, path : str = None, use_exif_orientation : bool = True) -> Image.Image:
+        """Takes a path to an image file and returns a PIL Image object which can be optionally
+        rotated in line with exif metadata"""
+        if path is None:
+            raise ValueError
+        image = Image.open(path)
+        if use_exif_orientation:
+            exif = image.getexif()
+            if exif is None:
+                pass
+            else:
+                for key, val in exif.items():
+                    if key in ExifTags.TAGS:
+                        print(f'{ExifTags.TAGS[key]}:{val}')
+                        if  ExifTags.TAGS[key] == 'Orientation':            
+                            if val == 3:
+                                image=image.transpose(Image.ROTATE_180)
+                            elif val == 6:
+                                image=image.transpose(Image.ROTATE_270)
+                            elif val == 8:
+                                image=image.transpose(Image.ROTATE_90)
+                            break
+        return image
 
     def __scale_image(self) -> ImageTk:
         """Get the size of the tkinter window - this

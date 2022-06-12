@@ -5,7 +5,7 @@ class Screen:
     def __init__(self):
         print("screen module initiailized")
         self.brightness_interface = "/sys/class/backlight/rpi_backlight/brightness"
-        self.is_on = False
+        self.is_on = True
 
     def change_brightness(self, value) -> bool:
         """write an uint8 value to brightness interface"""
